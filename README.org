@@ -19,7 +19,7 @@ sudo systemctl enable ntpd && sudo systemctl start ntpd
 
 ** edit config files
 *** /etc/kubernetes/config
-KUBE_MASTER="--master=http:/master:8080"
+KUBE_MASTER="--master=http://master:8080"
 KUBE_ETCD_SERVERS="--etcd-servers=http://master:2379"
 
 
@@ -29,7 +29,7 @@ ETCD_ADVERTISE_CLIENT_URLS="http://0.0.0.0:2379"
 
 
 *** /etc/kubernetes/apiserver
-KUBE_API_ADDRESS=--bind-address=0.0.0.0"
+KUBE_API_ADDRESS="--bind-address=0.0.0.0"
 KUBE_API_PORT="--port=8080"
 KUBELET_PORT="--kubelet-port=10250"
 
@@ -72,5 +72,10 @@ man kubectl
 kubectl get nodes
 
 
+* misc
+systemctl | grep kube
+
 * links
 http://kubernetes.io/docs/troubleshooting/
+
+
