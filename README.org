@@ -1,0 +1,76 @@
+* for all nodes
+
+sudo yum install -y ntp
+sudo systemctl enable ntpd && sudo systemctl start ntpd
+
+** add entries to host file 
+172.20.20.10    master
+172.20.20.11    minion1
+172.20.20.12    minion2
+172.20.20.13    minion3
+
+
+** ensure hosts can ping each other
+
+
+
+
+* for the master
+
+** edit config files
+*** /etc/kubernetes/config
+KUBE_MASTER="--master=http:/master:8080"
+KUBE_ETCD_SERVERS="--etcd-servers=http://master:2379"
+
+
+*** /etc/etcd/etcd.conf
+ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
+ETCD_ADVERTISE_CLIENT_URLS="http://0.0.0.0:2379"
+
+
+*** /etc/kubernetes/apiserver
+KUBE_API_ADDRESS=--bind-address=0.0.0.0"
+KUBE_API_PORT="--port=8080"
+KUBELET_PORT="--kubelet-port=10250"
+
+** start/enable/check services
+systemctl enable etcd kube-apiserver kube-controller-manager kube-scheduler
+systemctl start etcd kube-apiserver kube-controller-manager kube-scheduler
+systemctl status etcd kube-apiserver kube-controller-manager kube-scheduler
+
+
+* for the minions
+** edit config files
+*** /etc/kubernetes/config
+
+KUBE_MASTER="--master=http://master:8080"
+KUBE_ETCD_SERVERS="--etcd-servers=http://master:2379"
+
+*** /etc/kubernets/kubelet
+KUBELET_ADDRESS="--address=0.0.0.0"
+KUBELET_PORT="--port=10250"
+KUBELET_API_SERVER="--api-servers=http://master:8080"
+KUBELET_HOSTNAME="--hostname-override=master"
+
+** start/enable/check services
+systemctl enable kube-proxy kubelet docker
+systemctl start kube-proxy kubelet docker
+systemctl status kube-proxy kubelet docker
+
+** docker cmds
+docker images
+docker version
+docker --version
+docker pull hello-world
+docker run hello-world
+docker ps
+docker ps -a
+
+
+** kubectl (kube control )
+man kubectl
+kubectl get nodes
+
+
+* links
+http://kubernetes.io/docs/troubleshooting/
