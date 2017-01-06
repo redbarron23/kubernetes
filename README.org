@@ -19,9 +19,8 @@ sudo systemctl enable ntpd && sudo systemctl start ntpd
 
 ** edit config files
 *** /etc/kubernetes/config
-KUBE_MASTER="--master=http://master:8080"
-KUBE_ETCD_SERVERS="--etcd-servers=http://master:2379"
-
+KUBE_MASTER="--master=http://master.example.com:8080"
+KUBE_ETCD_SERVERS="--etcd-servers=http://master.example.com:2379"
 
 *** /etc/etcd/etcd.conf
 ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
@@ -29,14 +28,16 @@ ETCD_ADVERTISE_CLIENT_URLS="http://0.0.0.0:2379"
 
 
 *** /etc/kubernetes/apiserver
-KUBE_API_ADDRESS="--bind-address=0.0.0.0"
+KUBE_API_ADDRESS="--address=0.0.0.0"
 KUBE_API_PORT="--port=8080"
 KUBELET_PORT="--kubelet-port=10250"
 
 ** start/enable/check services
-systemctl enable etcd kube-apiserver kube-controller-manager kube-scheduler
-systemctl start etcd kube-apiserver kube-controller-manager kube-scheduler
-systemctl status etcd kube-apiserver kube-controller-manager kube-scheduler
+sudo systemctl enable etcd kube-apiserver kube-controller-manager kube-scheduler
+sudo systemctl start etcd kube-apiserver kube-controller-manager kube-scheduler
+sudo systemctl restart etcd kube-apiserver kube-controller-manager kube-scheduler
+sudo systemctl stop etcd kube-apiserver kube-controller-manager kube-scheduler
+sudo systemctl status etcd kube-apiserver kube-controller-manager kube-scheduler
 
 
 * for the minions
@@ -46,16 +47,17 @@ systemctl status etcd kube-apiserver kube-controller-manager kube-scheduler
 KUBE_MASTER="--master=http://master:8080"
 KUBE_ETCD_SERVERS="--etcd-servers=http://master:2379"
 
-*** /etc/kubernets/kubelet
+*** /etc/kubernetes/kubelet
 KUBELET_ADDRESS="--address=0.0.0.0"
 KUBELET_PORT="--port=10250"
 KUBELET_API_SERVER="--api-servers=http://master:8080"
-KUBELET_HOSTNAME="--hostname-override=master"
+KUBELET_HOSTNAME="--hostname-override=minion1"
 
 ** start/enable/check services
-systemctl enable kube-proxy kubelet docker
-systemctl start kube-proxy kubelet docker
-systemctl status kube-proxy kubelet docker
+sudo systemctl enable kube-proxy kubelet docker
+sudo systemctl start kube-proxy kubelet docker
+sudo systemctl status kube-proxy kubelet docker
+sudo systemctl restart kube-proxy kubelet docker
 
 ** docker cmds
 docker images
@@ -72,10 +74,60 @@ man kubectl
 kubectl get nodes
 
 
+* docker cmds
+docker run -itd ubuntu:xenial /bin/bash
+docker ps -a
+** inspect container
+docker inspect ubuntu:xenial
+** inspect instance
+docker inspect cockey_elion
+** grep IP
+docker inspect cockey_elion |grep IP
+** attach to instance
+docker attach desperate_hamilton
+** stop container
+docker stop desperate_hamilton
+** search for container on docker hub
+docker search ubuntu
+docker search ruby
+docker search training/sinatra
+
+** install container
+docker pull training/sinatra
+
+** start an instance
+docker run -it training/sinatra /bin/bash
+
+** create another image based off base image
+
+** create Dockerfile
+
+** delete images
+docker rmi 1abc...
+
+** delete instances
+docker rm <instance_id>
+** start container
+docker start <container>
+** stop container
+docker stop  <container>
+** check docker port
+docker port
+
+
 * misc
 systemctl | grep kube
+
 
 * links
 http://kubernetes.io/docs/troubleshooting/
 
 
+
+* troubleshooting
+** listening on localhost only
+kubectl cluster-info
+Kubernetes master is running at http://localhost:8080
+
+
+kubectl cluster-info dump

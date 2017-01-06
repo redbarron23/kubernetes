@@ -5,6 +5,7 @@ VAGRANTFILE_API_VERSION = "2"
 $script = <<SCRIPT
 sudo ifup eth1
 sudo yum install -y ntp
+sudo systemctl enable ntpd && systemctl start ntpd
 sudo systemctl enable ntpd && sudo systemctl start ntpd
 sudo cp /home/vagrant/virt7-docker-common-release.repo /etc/yum.repos.d
 sudo yum update
@@ -21,17 +22,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "file", source: "virt7-docker-common-release.repo", destination: "/home/vagrant/virt7-docker-common-release.repo"
   config.vm.provision "shell", inline: $script
 
-  config.vm.provider "virtualbox" do |vb|
+  #config.vm.provider "virtualbox" do |vb|
     #   # Display the VirtualBox GUI when booting the machine
     #   vb.gui = true
     # Customize the amount of memory on the VM:
-    vb.memory = "1024"
-  end
+   # vb.memory = "1024"
+    #vb.cpus   = 2
+  #end
  
   config.vm.define "master" do |config|
       config.vm.hostname = "master"
-      config.vm.network "private_network", ip: "172.20.20.10", auto_config: false
+      #config.vm.network "private_network", ip: "172.20.20.10", auto_config: false
+      config.vm.network "private_network", ip: "172.20.20.10"
       config.vm.network "forwarded_port", guest: 8080, host: 8082
+      config.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--memory", "1024"]  
+      end
   end
 
   config.vm.define "minion1" do |config|

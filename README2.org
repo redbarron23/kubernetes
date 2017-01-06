@@ -1,0 +1,73 @@
+** Build Dockerfile
+[vagrant@minion1 Builds]$ cat Dockerfile
+# Dockerfile based on the latest Centos 7 image - non-privileged user entry
+# FROM must be the first non commented line!
+FROM centos:latest
+MAINTAINER jhourihane@gmail.com
+
+** Run failed
+sudo docker run -it  centos7/nonroot:v1 /bin/bash
+unable to find user user: no matching entries in passwd file
+docker: Error response from daemon: Cannot start container d32ed1ce3393c8079805adbdb5babc509cfdfad90cf12c59bf0c1a4456ffb510: [9] System error: unable to find user user: no matching entries in passwd file.
+
+
+
+
+** After
+cat Dockerfile
+# Dockerfile based on the latest Centos 7 image - non-privileged user entry
+# FROM must be the first non commented line!
+FROM centos:latest
+MAINTAINER jhourihane@gmail.com
+
+RUN useradd -ms /bin/bash user
+USER user
+
+
+** Build
+[vagrant@minion1 Builds]$ sudo docker build -t centos7/nonroot:v1 .
+Sending build context to Docker daemon 4.096 kB
+Step 1 : FROM centos:latest
+ ---> 67591570dd29
+Step 2 : MAINTAINER jhourihane@gmail.com
+ ---> Using cache
+ ---> 7f262f18c287
+Step 3 : RUN useradd -ms /bin/bash user
+ ---> Running in 910ae230c2b5
+ ---> 33a0be9e4637
+Removing intermediate container 910ae230c2b5
+Step 4 : USER user
+ ---> Running in b5328cdb3989
+ ---> 3dbf61ff9ec2
+Removing intermediate container b5328cdb3989
+Successfully built 3dbf61ff9ec2
+
+
+** RUN
+[vagrant@minion1 Builds]$ sudo docker run -it  centos7/nonroot:v1 /bin/bash
+[user@752824e62fe6 /]$
+
+
+** execute a command
+[user@7c35f46604e1 /]$ whoami
+user
+
+** docker attach as root
+sudo docker ps -a
+CONTAINER ID        IMAGE                COMMAND             CREATED              STATUS                          PORTS               NAMES
+547c340df73a        centos7/nonroot:v1   "/bin/bash"         55 seconds ago       Exited (127) 7 seconds ago                          drunk_austin
+...
+
+grant@minion1 Builds]$ sudo docker exec -u 0 -it  drunk_austin /bin/bash
+[root@547c340df73a /]#
+
+*** check process
+[vagrant@minion1 Builds]$ sudo docker exec -u 0 -it  drunk_austin /bin/bash
+[root@547c340df73a /]# ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+user         1  0.0  0.3  11768  1680 ?        Ss+  03:01   0:00 /bin/bash
+root        30  0.6  0.3  11768  1888 ?        Ss   03:04   0:00 /bin/bash
+root        42  0.0  0.3  47440  1684 ?        R+   03:04   0:00 ps aux
+
+
+* Managing Ports with Container Deployments
